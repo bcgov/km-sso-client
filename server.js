@@ -49,7 +49,6 @@ const removeProtocol = `/(^\w+:|^)\/\//`;
 const allowedOrigins = [
   String(process.env.SSO_BASE_DOMAIN).replace(removeProtocol, ''),
   String(process.env.SSO_REDIS_SESSION_STORE_URL).replace(removeProtocol, ''), 
-  String(process.env.SSO_REDIRECT_URL).replace(removeProtocol, ''),
   String(process.env.SSO_AUTH_SERVER_URL).replace(removeProtocol, '')
 ];
 
