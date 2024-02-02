@@ -50,6 +50,7 @@ export const setRoutes = (router) => {
    */
 
   router.get('/authn/callback', (req, res, next) => {
+    console.log(req.headers, req)
     passport.authenticate('oidc', {
       successRedirect: `https://${req.headers.host}`,
       failureRedirect: '/',
