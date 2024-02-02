@@ -17,7 +17,8 @@
     "openid-client": "^5.3.0",
     "passport": "^0.6.0",
     "redis": "4.6.12",
-    "connect-redis": "7.1.0"
+    "connect-redis": "7.1.0",
+    "cors": "2.8.5"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",

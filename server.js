@@ -7,7 +7,7 @@ import * as dotenv from 'dotenv';
 import { setRoutes } from './routes.js';
 import redis from 'redis';
 import RedisStore from "connect-redis";
-const cors = require("cors");
+import cors from "cors";
 
 // optional load of .env
 dotenv.config();
