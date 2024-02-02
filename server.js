@@ -77,8 +77,9 @@ app.use(session({
   store: redisStore,
   secret: process.env.SSO_SESSION_SECRET,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
+      sameSite: 'strict',
       secure: true, // if true only transmit cookie over https
       httpOnly: true, // if true prevent client side JS from reading the cookie 
       maxAge: 1000 * 60 * 10 // session max age in miliseconds
