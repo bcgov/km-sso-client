@@ -15,7 +15,7 @@ dotenv.config();
 // create express application
 const app = express();
 
-// api.use(helmet({contentSecurityPolicy: false}));
+// app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.disable("x-powered-by");
@@ -70,7 +70,7 @@ const corsConfig = {
     credentials: true,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
-api.use(cors(corsConfig));
+app.use(cors(corsConfig));
 
 //Configure session middleware
 app.use(session({
