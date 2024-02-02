@@ -53,6 +53,7 @@ const allowedOrigins = [
   String(process.env.SSO_AUTH_SERVER_URL).replace(removeProtocol, '')
 ];
 
+// CORS configuration settings
 const corsConfig = {
     origin: function (origin, callback) {
         if (!origin) return callback(null, true);
