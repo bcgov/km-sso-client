@@ -45,11 +45,10 @@ let redisStore = new RedisStore({
 });
 
 // configure CORS allowed hostnames
-const removeProtocol = `/(^\w+:|^)\/\//`;
 const allowedOrigins = [
-  String(process.env.SSO_BASE_DOMAIN).replace(removeProtocol, ''),
-  String(process.env.SSO_REDIS_SESSION_STORE_URL).replace(removeProtocol, ''), 
-  String(process.env.SSO_AUTH_SERVER_URL).replace(removeProtocol, '')
+  process.env.SSO_BASE_URL,
+  process.env.SSO_REDIS_SESSION_STORE_URL, 
+  process.env.SSO_AUTH_SERVER_URL
 ];
 
 // CORS configuration settings
