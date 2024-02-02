@@ -7,9 +7,12 @@ import * as dotenv from 'dotenv';
 import { setRoutes } from './routes.js';
 import redis from 'redis';
 import RedisStore from "connect-redis";
+const cors = require("cors");
 
+// optional load of .env
 dotenv.config();
 
+// create express application
 const app = express();
 
 // api.use(helmet({contentSecurityPolicy: false}));
@@ -34,12 +37,39 @@ redisClient.on('error', function (err) {
 redisClient.on('connect', function (err) {
   console.log('Connected to redis session store successfully');
 });
-redisClient.connect().catch(console.error)
+redisClient.connect().catch(console.error);
 
 // Initialize store.
 let redisStore = new RedisStore({
   client: redisClient,
 });
+
+// configure CORS allowed hostnames
+const removeProtocol = `/(^\w+:|^)\/\//`;
+const allowedOrigins = [
+  String(process.env.SSO_BASE_ORIGIN).replace(removeProtocol, ''),
+  String(process.env.SSO_REDIS_SESSION_STORE_URL).replace(removeProtocol, ''), 
+  String(process.env.SSO_REDIRECT_URL).replace(removeProtocol, ''),
+  String(process.env.SSO_AUTH_SERVER_URL).replace(removeProtocol, '')
+];
+
+const corsConfig = {
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg =
+                "The CORS policy for this site does not " +
+                "allow access from the specified origin: \n" +
+                origin;
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    methods: ["GET", "POST"],
+    credentials: true,
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+api.use(cors(corsConfig));
 
 //Configure session middleware
 app.use(session({
