@@ -127,7 +127,7 @@ passport.deserializeUser((user, done) => {
 
 app.listen(3000, function () {
   console.log('Listening on port 3000');
-  console.log('Allowed orgins:', allowedOrigins.join(', '));
+  console.log('Allowed origins:', allowedOrigins.join(', '));
 });
 
 export { passport, keycloakClient, tokenset };
