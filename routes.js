@@ -6,7 +6,7 @@ import { passport, keycloakClient, tokenset } from './server.js';
 
 const isAuthenticated = (req, res, next) => {
   console.log('Is authenticated:', req.isAuthenticated)
-  if( !req.isAuthenticated ) return passport.authenticate('oidc', {
+  if( !req.user ) return passport.authenticate('oidc', {
     successRedirect: `/isauth`,
     failureRedirect: '/noauth',
   })(req, res, next);
