@@ -72,21 +72,13 @@ const allowedOrigins = [
 
 // CORS configuration settings
 const corsConfig = {
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg =
-                "The CORS policy for this site does not " +
-                "allow access from the specified origin: \n" +
-                origin;
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    },
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
+
+// init CORS middleware
 app.use(cors(corsConfig));
 
 // Configure session middleware
