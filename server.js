@@ -144,8 +144,12 @@ let tokenset = {};
 
 passport.use(
   'oidc',
-  new Strategy({ client: keycloakClient }, (tokenSet, userinfo, done) => {
-    tokenset = tokenSet;
+  new Strategy({ client: keycloakClient, passReqToCallback: true}, (req, tokenSet, userinfo, done) => {
+    console.log("tokenSet",tokenSet);
+    console.log("userinfo",userinfo);
+    tokenset = tokenSet
+    req.session.tokenSet = tokenSet;
+    req.session.userinfo = userinfo;
     return done(null, tokenSet.claims());
   }),
 );
