@@ -1,3 +1,22 @@
+/** 
+ * Keycloak Client: Authorization Code Flow with OIDC
+ * The Authorization Code Flow is used by server-side applications that 
+ * are capable of securely storing secrets, or by native applications 
+ * through Authorization Code Flow with PKCE.
+ * 
+ * The OIDC-conformant pipeline affects the Authorization Code Flow in 
+ * the following areas:
+ *  - Authentication request
+ *  - Authentication response
+ *  - Code exchange request
+ *  - Code exchange response
+ *  - ID token structure
+ *  - Access token structure
+ *  - Authentication
+ * 
+ * MIT Licensed 2024
+ */
+
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
@@ -70,17 +89,18 @@ const corsConfig = {
 };
 app.use(cors(corsConfig));
 
-//Configure session middleware
+// Configure session middleware
+// - connects to Redis store for sessions
 app.use(session({
   store: redisStore,
   secret: process.env.SSO_SESSION_SECRET,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
   cookie: {
       sameSite: 'strict',
-      secure: true, // if true only transmit cookie over https
-      httpOnly: true, // if true prevent client side JS from reading the cookie 
-      maxAge: 1000 * 60 * 10 // session max age in miliseconds
+      secure: true, 
+      httpOnly: true, 
+      maxAge: 1000 * 60 * 10
   }
 }));
 
@@ -91,15 +111,31 @@ app.use(cookieParser(process.env.SSO_SESSION_SECRET));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// init Express router
 const router = express.Router();
 
+// init API routes
 setRoutes(router);
-
 app.use('/', router);
+
+/**
+ * Loads OpenID Connect 1.0 and/or OAuth 2.0 Authorization Server Metadata 
+ * documents. When the issuer argument contains '.well-known' only that 
+ * document is loaded, otherwise performs both openid-configuration and 
+ * oauth-authorization-server requests.
+ * 
+ * This is the recommended method of getting yourself an Issuer instance.
+ * - issuer: <string> Issuer Identifier or metadata URL
+ * - Returns: Promise<Issuer>
+ */
 
 const keycloakIssuer = await Issuer.discover(
   `${process.env.SSO_AUTH_SERVER_URL}/realms/${process.env.SSO_REALM}/.well-known/openid-configuration`,
 );
+
+/**
+ * Returns the <Client> class tied to the Keycloak issuer.
+ */
 
 const keycloakClient = new keycloakIssuer.Client({
   client_id: process.env.SSO_CLIENT_ID,
@@ -107,6 +143,10 @@ const keycloakClient = new keycloakIssuer.Client({
   redirect_uris: [process.env.SSO_REDIRECT_URL],
   response_types: ['code'],
 });
+
+/**
+ * Returns the <Client> class tied to the Keycloak issuer.
+ */
 
 let tokenset = {};
 
