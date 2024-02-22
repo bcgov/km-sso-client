@@ -130,7 +130,7 @@ app.use('/', router);
  */
 
 const keycloakIssuer = await Issuer.discover(
-  `${process.env.SSO_AUTH_SERVER_URL}/realms/${process.env.SSO_REALM}/.well-known/openid-configuration`,
+  `${process.env.SSO_AUTH_SERVER_URL}/auth/realms/${process.env.SSO_REALM}/.well-known/openid-configuration`,
 );
 
 /**

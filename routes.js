@@ -59,7 +59,7 @@ export const setRoutes = (router) => {
 
   router.get('/logout', (req, res, next) => {
     req.session.destroy();
-    const retUrl = `${process.env.SSO_AUTH_SERVER_URL}/realms/${
+    const retUrl = `${process.env.SSO_AUTH_SERVER_URL}/auth/realms/${
       process.env.SSO_REALM
     }/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(
       process.env.SSO_LOGOUT_REDIRECT_URI,
