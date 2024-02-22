@@ -36,7 +36,8 @@ export const setRoutes = (router) => {
     passport.authenticate('oidc', {
       successRedirect: `https://${req.headers.host}?confirmed=true`,
       failureRedirect: '/noauth',
-    });
+    })
+  });
 
   /**
    * User is authenticated: return 200 status
