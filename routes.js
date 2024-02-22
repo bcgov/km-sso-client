@@ -31,11 +31,12 @@ export const setRoutes = (router) => {
    * Callback for authentication redirection
    */
 
-  router.get('/authn/callback', passport.authenticate('oidc', {
+  router.get('/authn/callback', (req, res, next) => {
+    console.log('Auth callback:', req.isAuthenticated)
+    passport.authenticate('oidc', {
       successRedirect: `https://${req.headers.host}?confirmed=true`,
-      failureRedirect: '/noauth'
-    })
-  );
+      failureRedirect: '/noauth',
+    });
 
   /**
    * User is authenticated: return 200 status
