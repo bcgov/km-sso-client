@@ -1,37 +1,70 @@
 import { passport, keycloakClient, tokenset } from './server.js';
 
+/**
+   * Check user authentication
+   */
+
+const isAuthenticated = (req, res, next) => {
+  console.log('Is authenticated:', req.isAuthenticated)
+  if( !req.isAuthenticated ) return passport.authenticate('oidc', {
+    successRedirect: `/isauth`,
+    failureRedirect: '/noauth',
+  })(req, res, next);
+  next();
+}
+
 export const setRoutes = (router) => {
 
   /**
-   * Return status of user session
+   * Authorize user session
    */
   
-  router.get('/', (req, res, next) => {
+  router.get('/', isAuthenticated);
 
-    // DEBUG
-    // const {name} = req?.session?.passport?.user || {};
-    // console.log('\n\n<<< Authenticate >>>\n\nUser:', name);
+  /**
+   * Authentication (Keycloak SSO-CSS)
+   */
 
-    if (req?.session?.passport?.user) {
-      res.status(200).json({
+  router.get('/authn', passport.authenticate('oidc'));
+
+  /**
+   * Callback for authentication redirection
+   */
+
+  router.get('/authn/callback', passport.authenticate('oidc', {
+      successRedirect: `https://${req.headers.host}?confirmed=true`,
+      failureRedirect: '/noauth'
+    })
+  );
+
+  /**
+   * User is authenticated: return 200 status
+   */
+  
+  router.get('/isauth', (req, res, next) => {
+    return res.status(200).json({
         message: {},
         result: true,
       });
-    }
-    else {
-      res.status(401).json({
+    });
+
+  /**
+   * User is not authenticated: return 401 status
+   */
+  
+  router.get('/noauth', (req, res, next) => {
+    return res.status(401).json({
         message: {},
         result: false,
       });
-    }
-  });
+    });
 
   /**
    * Return response status of application
    */
   
   router.get('/health', (req, res, next) => {
-    res.status(200).json({
+    return res.status(200).json({
         message: {},
         result: true,
       });
@@ -39,23 +72,8 @@ export const setRoutes = (router) => {
   );
 
   /**
-   * Authentication redirect (Keycloak SSO)
+   * Logout user from Keycloak session
    */
-
-  router.get('/authn', (req, res, next) => {
-    passport.authenticate('oidc')(req, res, next);
-  });
-
-  /**
-   * Callback for authentication redirection
-   */
-
-  router.get('/authn/callback', (req, res, next) => {
-    passport.authenticate('oidc', {
-      successRedirect: `https://${req.headers.host}`,
-      failureRedirect: '/',
-    })(req, res, next);
-  });
 
   router.get('/logout', (req, res, next) => {
     req.session.destroy();

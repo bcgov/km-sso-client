@@ -45,7 +45,7 @@ app.disable("x-powered-by");
 // ref: https://expressjs.com/en/guide/behind-proxies.html
 app.set("trust proxy", 1);
 
-// Initialize redis client
+// Initialize redis client for session store
 let redisClient = redis.createClient({
   url: process.env.SSO_REDIS_SESSION_STORE_URL,
   password: process.env.SSO_REDIS_CONNECT_PASSWORD
@@ -86,7 +86,7 @@ app.use(cors(corsConfig));
 app.use(session({
   store: redisStore,
   secret: process.env.SSO_SESSION_SECRET,
-  resave: false,
+  resave: true,
   saveUninitialized: true,
   cookie: {
       sameSite: 'strict',
@@ -97,7 +97,7 @@ app.use(session({
 }));
 
 // parse cookies to store session data
-app.use(cookieParser(process.env.SSO_SESSION_SECRET));
+// app.use(cookieParser(process.env.SSO_SESSION_SECRET));
 
 // init Passport
 app.use(passport.initialize());
@@ -105,15 +105,13 @@ app.use(passport.session());
 
 // init Express router
 const router = express.Router();
-
-// init API routes
 setRoutes(router);
 app.use('/', router);
 
 /**
- * Loads OpenID Connect 1.0 and/or OAuth 2.0 Authorization Server Metadata 
- * documents. When the issuer argument contains '.well-known' only that 
- * document is loaded, otherwise performs both openid-configuration and 
+ * Loads OpenID Connect 1.0 documents. When the issuer 
+ * argument contains '.well-known' only that document is loaded, 
+ * otherwise performs both openid-configuration and 
  * oauth-authorization-server requests.
  * 
  * This is the recommended method of getting yourself an Issuer instance.
