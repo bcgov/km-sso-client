@@ -5,10 +5,11 @@ import { passport, keycloakClient, tokenset } from './server.js';
    */
 
 const isAuthenticated = (req, res, next) => {
-  console.log('Is authenticated?', req.user)
   passport.authenticate('oidc', {}, function(err, user, info, status) {
+    // DEBUG
+    console.log('Is authenticated?', user, info, status)
     if (err) { return next(err) }
-    if (!user) { return res.status(400) }
+    if (!user) { return res.status(401) }
     res.status(200);
   })(req, res, next);
 }
@@ -40,34 +41,12 @@ export const setRoutes = (router) => {
   });
 
   /**
-   * User is authenticated: return 200 status
-   */
-  
-  router.get('/isauth', (req, res, next) => {
-    return res.status(200).json({
-        message: {},
-        result: true,
-      });
-    });
-
-  /**
-   * User is not authenticated: return 401 status
-   */
-  
-  router.get('/noauth', (req, res, next) => {
-    return res.status(401).json({
-        message: {},
-        result: false,
-      });
-    });
-
-  /**
    * Return response status of application
    */
   
   router.get('/health', (req, res, next) => {
-    
-  );
+    return res.status(200)
+  });
 
   /**
    * Logout user from Keycloak session
