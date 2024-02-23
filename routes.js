@@ -7,14 +7,12 @@ export const setRoutes = (router) => {
    * 
    */
   
-  router.get('/', (req, res, next) => {
-    passport.authenticate('oidc', function(err, user, info, status) {
+  router.get('/', passport.authenticate('oidc'), (req, res, next) => {
       // DEBUG
       console.log('Authenticate?', err, user, info, status)
       if (err) return next(err);
       if (!user) return res.sendStatus(401);
       res.sendStatus(200);
-    })(req, res, next)
   });
 
   // app.get('/protected', function(req, res, next) {
