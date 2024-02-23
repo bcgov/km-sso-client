@@ -56,29 +56,6 @@ const keycloakClient = new keycloakIssuer.Client({
   response_types: ['code'],
 });
 
-/**
- * Configure passport
- * Returns the <Client> class tied to the Keycloak issuer.
- */
-
-let tokenset = {};
-
-passport.use(
-  'oidc',
-  new Strategy({ client: keycloakClient}, (tokenSet, userinfo, done) => {
-    console.log("tokenSet",tokenSet);
-    console.log("userinfo",userinfo);
-    tokenset = tokenSet
-    return done(null, tokenSet.claims());
-  }),
-);
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
 // Initialize redis client for session store
 let redisClient = redis.createClient({
   url: process.env.SSO_REDIS_SESSION_STORE_URL,
@@ -129,7 +106,7 @@ app.use(session({
     client: redisClient,
   }),
   secret: process.env.SSO_SESSION_SECRET,
-  resave: false,
+  resave: true,
   saveUninitialized: false,
   cookie: {
       sameSite: 'strict',
@@ -142,6 +119,29 @@ app.use(session({
 // init Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+/**
+ * Configure passport
+ * Returns the <Client> class tied to the Keycloak issuer.
+ */
+
+let tokenset = {};
+
+passport.use(
+  'oidc',
+  new Strategy({ client: keycloakClient}, (tokenSet, userinfo, done) => {
+    console.log("tokenSet",tokenSet);
+    console.log("userinfo",userinfo);
+    tokenset = tokenSet
+    return done(null, tokenSet.claims());
+  }),
+);
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
 
 /**
    * Authorize user session
