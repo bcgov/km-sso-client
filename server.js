@@ -53,7 +53,7 @@ const keycloakClient = new keycloakIssuer.Client({
   client_id: process.env.SSO_CLIENT_ID,
   client_secret: process.env.SSO_CLIENT_SECRET,
   redirect_uris: [process.env.SSO_REDIRECT_URL],
-  response_types: ['id_token'],
+  response_types: ['code'],
 });
 
 /**
@@ -166,10 +166,10 @@ app.get('/authn', passport.authenticate('oidc'));
 */
 
 app.get('/authn/callback', (req, res, next) => {
-passport.authenticate('oidc', {
-  successRedirect: `https://${req.headers.host}?confirmed=true`,
-  failureRedirect: '/',
-})(req, res, next);
+  passport.authenticate('oidc', {
+    successRedirect: `https://${req.headers.host}?confirmed=true`,
+    failureRedirect: '/',
+  })(req, res, next);
 });
 
 /**
