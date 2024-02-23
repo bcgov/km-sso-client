@@ -4,9 +4,11 @@ export const setRoutes = (router) => {
 
   /**
    * Authorize user session
+   * 
    */
   
-  router.get('/', function(req, res, next) {
+  router.get('/', (req, res, next) => {
+    console.log('Is authenticated?', req)
     passport.authenticate('oidc', function(err, user, info, status) {
       // DEBUG
       console.log('Is authenticated?', user, info, status)
@@ -15,6 +17,14 @@ export const setRoutes = (router) => {
       res.sendStatus(200);
     })(req, res, next)
   });
+
+  // app.get('/protected', function(req, res, next) {
+  //   passport.authenticate('local', function(err, user, info, status) {
+  //     if (err) { return next(err) }
+  //     if (!user) { return res.redirect('/signin') }
+  //     res.redirect('/account');
+  //   })(req, res, next);
+  // });
 
   /**
    * Authentication (Keycloak SSO-CSS)
@@ -30,7 +40,7 @@ export const setRoutes = (router) => {
     console.log('Auth callback:', req.headers)
     passport.authenticate('oidc', {
       successRedirect: `https://${req.headers.host}?confirmed=true`,
-      failureRedirect: '/noauth',
+      failureRedirect: '/',
     })
   });
 
