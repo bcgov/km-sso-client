@@ -6,13 +6,11 @@ export const setRoutes = (router) => {
    * Authorize user session
    * 
    */
-  
-  router.get('/', passport.authenticate('oidc'), (req, res, next) => {
+
+  router.get('/', (req, res) => {
       // DEBUG
-      console.log('Authenticate?', err, user, info, status)
-      if (err) return next(err);
-      if (!user) return res.sendStatus(401);
-      res.sendStatus(200);
+      console.log('Authenticated?', req.isAuthenticated())
+      return res.sendStatus(req.isAuthenticated() ? 200 : 401);
   });
 
   // app.get('/protected', function(req, res, next) {
