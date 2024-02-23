@@ -8,9 +8,9 @@ const isAuthenticated = (req, res, next) => {
   passport.authenticate('oidc', {}, function(err, user, info, status) {
     // DEBUG
     console.log('Is authenticated?', user, info, status)
-    if (err) { return next(err) }
-    if (!user) { return res.status(401) }
-    res.status(200);
+    if (err) return next(err);
+    if (!user) return res.sendStatus(401);
+    res.sendStatus(200);
   })(req, res, next);
 }
 
@@ -45,7 +45,7 @@ export const setRoutes = (router) => {
    */
   
   router.get('/health', (req, res, next) => {
-    return res.status(200)
+    return res.sendStatus(200);
   });
 
   /**
