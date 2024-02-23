@@ -25,12 +25,10 @@ import * as dotenv from 'dotenv';
 import redis from 'redis';
 import RedisStore from "connect-redis";
 import cors from "cors";
+import logger from "morgan";
 
 // optional load of .env
 dotenv.config();
-
-// create express application
-const app = express();
 
 /**
  * Loads OpenID Connect 1.0 documents. When the issuer 
@@ -55,7 +53,7 @@ const keycloakClient = new keycloakIssuer.Client({
   client_id: process.env.SSO_CLIENT_ID,
   client_secret: process.env.SSO_CLIENT_SECRET,
   redirect_uris: [process.env.SSO_REDIRECT_URL],
-  response_types: ['code'],
+  response_types: ['id_token'],
 });
 
 /**
@@ -118,8 +116,12 @@ const corsConfig = {
     optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
-// init CORS middleware
+// create express application
+const app = express();
+
+// init utility middleware
 app.use(cors(corsConfig));
+app.use(logger('dev'));
 
 // Configure session middleware
 // - connects to Redis store for sessions
@@ -148,7 +150,7 @@ app.use(passport.session());
    */
 
 app.get('/', (req, res) => {
-  console.log(req.user, req.account, req.session)
+  console.log(req.session)
   // DEBUG
   console.log('Authenticated?', req.isAuthenticated())
   return res.sendStatus(req.isAuthenticated() ? 200 : 401);
@@ -158,7 +160,9 @@ app.get('/', (req, res) => {
 * Authentication (Keycloak SSO-CSS)
 */
 
-app.get('/authn', passport.authenticate('oidc'));
+app.get('/authn', passport.authenticate('oidc', {
+  successReturnToOrRedirect: "/"
+}));
 
 /**
 * Callback for authentication redirection
@@ -166,7 +170,8 @@ app.get('/authn', passport.authenticate('oidc'));
 
 app.get('/authn/callback', (req, res, next) => {
 passport.authenticate('oidc', {
-  successRedirect: `https://${req.headers.host}?confirmed=true`,
+  callback: true,
+  successReturnToOrRedirect: `https://${req.headers.host}?confirmed=true`,
   failureRedirect: '/',
 })(req, res, next);
 });
