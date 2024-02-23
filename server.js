@@ -18,7 +18,6 @@
  */
 
 import express from 'express';
-import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import passport from 'passport';
 import { Issuer, Strategy } from 'openid-client';
@@ -58,11 +57,6 @@ redisClient.on('connect', function (err) {
 });
 redisClient.connect().catch(console.error);
 
-// Initialize store.
-let redisStore = new RedisStore({
-  client: redisClient,
-});
-
 // configure CORS allowed hostnames
 const allowedOrigins = [
   process.env.SSO_BASE_URL,
@@ -84,10 +78,12 @@ app.use(cors(corsConfig));
 // Configure session middleware
 // - connects to Redis store for sessions
 app.use(session({
-  store: redisStore,
+  store: new RedisStore({
+    client: redisClient,
+  }),
   secret: process.env.SSO_SESSION_SECRET,
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   cookie: {
       sameSite: 'strict',
       secure: true, 
@@ -95,9 +91,6 @@ app.use(session({
       maxAge: 1000 * 60 * 10
   }
 }));
-
-// parse cookies to store session data
-app.use(cookieParser(process.env.SSO_SESSION_SECRET));
 
 // init Passport
 app.use(passport.initialize());

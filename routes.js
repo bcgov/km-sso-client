@@ -13,14 +13,6 @@ export const setRoutes = (router) => {
       return res.sendStatus(req.isAuthenticated() ? 200 : 401);
   });
 
-  // app.get('/protected', function(req, res, next) {
-  //   passport.authenticate('local', function(err, user, info, status) {
-  //     if (err) { return next(err) }
-  //     if (!user) { return res.redirect('/signin') }
-  //     res.redirect('/account');
-  //   })(req, res, next);
-  // });
-
   /**
    * Authentication (Keycloak SSO-CSS)
    */
