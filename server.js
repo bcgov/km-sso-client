@@ -97,7 +97,7 @@ app.use(session({
 }));
 
 // parse cookies to store session data
-// app.use(cookieParser(process.env.SSO_SESSION_SECRET));
+app.use(cookieParser(process.env.SSO_SESSION_SECRET));
 
 // init Passport
 app.use(passport.initialize());
@@ -133,8 +133,6 @@ const keycloakClient = new keycloakIssuer.Client({
   redirect_uris: [process.env.SSO_REDIRECT_URL],
   response_types: ['code'],
 });
-
-console.log(keycloakClient.metadata)
 
 /**
  * Returns the <Client> class tied to the Keycloak issuer.
