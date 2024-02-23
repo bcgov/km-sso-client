@@ -1,26 +1,20 @@
 import { passport, keycloakClient, tokenset } from './server.js';
 
-/**
-   * Check user authentication
-   */
-
-const isAuthenticated = (req, res, next) => {
-  passport.authenticate('oidc', function(err, user, info, status) {
-    // DEBUG
-    console.log('Is authenticated?', user, info, status)
-    if (err) return next(err);
-    if (!user) return res.sendStatus(401);
-    res.sendStatus(200);
-  })(req, res, next);
-}
-
 export const setRoutes = (router) => {
 
   /**
    * Authorize user session
    */
   
-  router.get('/', isAuthenticated);
+  router.get('/', (req, res, next) => {
+    passport.authenticate('oidc', function(err, user, info, status) {
+      // DEBUG
+      console.log('Is authenticated?', user, info, status)
+      if (err) return next(err);
+      if (!user) return res.sendStatus(401);
+      res.sendStatus(200);
+    })
+  });
 
   /**
    * Authentication (Keycloak SSO-CSS)
