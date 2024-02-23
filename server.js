@@ -148,6 +148,7 @@ app.use(passport.session());
    */
 
 app.get('/', (req, res) => {
+  console.log(req.user, req.account, req.session)
   // DEBUG
   console.log('Authenticated?', req.isAuthenticated())
   return res.sendStatus(req.isAuthenticated() ? 200 : 401);
