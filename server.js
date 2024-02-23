@@ -174,7 +174,7 @@ passport.authenticate('oidc', {
 * Return response status of application
 */
 
-app.get('/health', (_, res, _) => {
+app.get('/health', (req, res) => {
 return res.sendStatus(200);
 });
 
