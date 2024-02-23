@@ -159,9 +159,7 @@ app.get('/', (req, res) => {
 * Authentication (Keycloak SSO-CSS)
 */
 
-app.get('/authn', passport.authenticate('oidc', {
-  successRedirect: "/"
-}));
+app.get('/authn', passport.authenticate('oidc'));
 
 /**
 * Callback for authentication redirection
