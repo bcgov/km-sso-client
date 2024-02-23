@@ -22,7 +22,6 @@ import session from 'express-session';
 import passport from 'passport';
 import { Issuer, Strategy } from 'openid-client';
 import * as dotenv from 'dotenv';
-import { setRoutes } from './routes.js';
 import redis from 'redis';
 import RedisStore from "connect-redis";
 import cors from "cors";
@@ -33,14 +32,61 @@ dotenv.config();
 // create express application
 const app = express();
 
+/**
+ * Loads OpenID Connect 1.0 documents. When the issuer 
+ * argument contains '.well-known' only that document is loaded, 
+ * otherwise performs both openid-configuration and 
+ * oauth-authorization-server requests.
+ * 
+ * This is the recommended method of getting yourself an Issuer instance.
+ * - issuer: <string> Issuer Identifier or metadata URL
+ * - Returns: Promise<Issuer>
+ */
+
+const keycloakIssuer = await Issuer.discover(
+  `${process.env.SSO_AUTH_SERVER_URL}/auth/realms/${process.env.SSO_REALM}/.well-known/openid-configuration`,
+);
+
+/**
+ * Returns the <Client> class tied to the Keycloak issuer.
+ */
+
+const keycloakClient = new keycloakIssuer.Client({
+  client_id: process.env.SSO_CLIENT_ID,
+  client_secret: process.env.SSO_CLIENT_SECRET,
+  redirect_uris: [process.env.SSO_REDIRECT_URL],
+  response_types: ['code'],
+});
+
+/**
+ * Configure passport
+ * Returns the <Client> class tied to the Keycloak issuer.
+ */
+
+let tokenset = {};
+
+passport.use(
+  'oidc',
+  new Strategy({ client: keycloakClient}, (tokenSet, userinfo, done) => {
+    console.log("tokenSet",tokenSet);
+    console.log("userinfo",userinfo);
+    tokenset = tokenSet
+    return done(null, tokenSet.claims());
+  }),
+);
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
 // app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.disable("x-powered-by");
 
-// init user sessions
-// 'trust proxy' = true, the client’s IP address is understood as the
-// left-most entry in the X-Forwarded-For header.
+// 'trust proxy' = truthy to handle undefined forwarded proxy
 // ref: https://expressjs.com/en/guide/behind-proxies.html
 app.set("trust proxy", 1);
 
@@ -96,59 +142,59 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// init Express router
-const router = express.Router();
-setRoutes(router);
-app.use('/', router);
-
 /**
- * Loads OpenID Connect 1.0 documents. When the issuer 
- * argument contains '.well-known' only that document is loaded, 
- * otherwise performs both openid-configuration and 
- * oauth-authorization-server requests.
- * 
- * This is the recommended method of getting yourself an Issuer instance.
- * - issuer: <string> Issuer Identifier or metadata URL
- * - Returns: Promise<Issuer>
- */
+   * Authorize user session
+   * 
+   */
 
-const keycloakIssuer = await Issuer.discover(
-  `${process.env.SSO_AUTH_SERVER_URL}/auth/realms/${process.env.SSO_REALM}/.well-known/openid-configuration`,
-);
-
-/**
- * Returns the <Client> class tied to the Keycloak issuer.
- */
-
-const keycloakClient = new keycloakIssuer.Client({
-  client_id: process.env.SSO_CLIENT_ID,
-  client_secret: process.env.SSO_CLIENT_SECRET,
-  redirect_uris: [process.env.SSO_REDIRECT_URL],
-  response_types: ['code'],
+app.get('/', (req, res) => {
+  // DEBUG
+  console.log('Authenticated?', req.isAuthenticated())
+  return res.sendStatus(req.isAuthenticated() ? 200 : 401);
 });
 
 /**
- * Returns the <Client> class tied to the Keycloak issuer.
- */
+* Authentication (Keycloak SSO-CSS)
+*/
 
-let tokenset = {};
+router.get('/authn', passport.authenticate('oidc'));
 
-passport.use(
-  'oidc',
-  new Strategy({ client: keycloakClient}, (tokenSet, userinfo, done) => {
-    console.log("tokenSet",tokenSet);
-    console.log("userinfo",userinfo);
-    tokenset = tokenSet
-    return done(null, tokenSet.claims());
-  }),
-);
+/**
+* Callback for authentication redirection
+*/
 
-passport.serializeUser((user, done) => {
-  done(null, user);
+app.get('/authn/callback', (req, res, next) => {
+passport.authenticate('oidc', {
+  successRedirect: `https://${req.headers.host}?confirmed=true`,
+  failureRedirect: '/',
+})(req, res, next);
 });
-passport.deserializeUser((user, done) => {
-  done(null, user);
+
+/**
+* Return response status of application
+*/
+
+app.get('/health', (_, res, _) => {
+return res.sendStatus(200);
 });
+
+/**
+* Logout user from Keycloak session
+*/
+
+app.get('/logout', (req, res, next) => {
+  req.session.destroy();
+  const retUrl = `${process.env.SSO_AUTH_SERVER_URL}/auth/realms/${
+    process.env.SSO_REALM
+  }/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent(
+    process.env.SSO_LOGOUT_REDIRECT_URI,
+  )}&id_token_hint=${tokenset.id_token}`;
+  res.redirect(`https://logon7.gov.bc.ca/clp-cgi/logoff.cgi?retnow=1&returl=${encodeURIComponent(retUrl)}`);
+});
+
+/**
+* Show connection listener status
+*/
 
 app.listen(3000, function () {
   console.log('Listening on port 3000');
