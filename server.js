@@ -160,7 +160,7 @@ app.get('/', (req, res) => {
 */
 
 app.get('/authn', passport.authenticate('oidc', {
-  successReturnToOrRedirect: "/"
+  successRedirect: "/"
 }));
 
 /**
@@ -170,7 +170,7 @@ app.get('/authn', passport.authenticate('oidc', {
 app.get('/authn/callback', (req, res, next) => {
 passport.authenticate('oidc', {
   callback: true,
-  successReturnToOrRedirect: `https://${req.headers.host}?confirmed=true`,
+  successRedirect: `https://${req.headers.host}?confirmed=true`,
   failureRedirect: '/',
 })(req, res, next);
 });
