@@ -6,14 +6,14 @@ export const setRoutes = (router) => {
    * Authorize user session
    */
   
-  router.get('/', (req, res, next) => {
+  router.get('/', function(req, res, next) {
     passport.authenticate('oidc', function(err, user, info, status) {
       // DEBUG
       console.log('Is authenticated?', user, info, status)
       if (err) return next(err);
       if (!user) return res.sendStatus(401);
       res.sendStatus(200);
-    })
+    })(req, res, next)
   });
 
   /**
