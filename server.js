@@ -79,15 +79,6 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// app.use(helmet({contentSecurityPolicy: false}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.disable("x-powered-by");
-
-// 'trust proxy' = truthy to handle undefined forwarded proxy
-// ref: https://expressjs.com/en/guide/behind-proxies.html
-app.set("trust proxy", 1);
-
 // Initialize redis client for session store
 let redisClient = redis.createClient({
   url: process.env.SSO_REDIS_SESSION_STORE_URL,
@@ -122,6 +113,14 @@ const app = express();
 // init utility middleware
 app.use(cors(corsConfig));
 app.use(logger('dev'));
+// app.use(helmet({contentSecurityPolicy: false}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.disable("x-powered-by");
+
+// 'trust proxy' = truthy to handle undefined forwarded proxy
+// ref: https://expressjs.com/en/guide/behind-proxies.html
+app.set("trust proxy", 1);
 
 // Configure session middleware
 // - connects to Redis store for sessions
