@@ -5,12 +5,12 @@ import { passport, keycloakClient, tokenset } from './server.js';
    */
 
 const isAuthenticated = (req, res, next) => {
-  console.log('Is authenticated:', req.user)
-  if( !req.user ) return passport.authenticate('oidc', {
-    successRedirect: `/isauth`,
-    failureRedirect: '/noauth',
+  console.log('Is authenticated?', req.user)
+  passport.authenticate('oidc', {}, function(err, user, info, status) {
+    if (err) { return next(err) }
+    if (!user) { return res.status(400) }
+    res.status(200);
   })(req, res, next);
-  next();
 }
 
 export const setRoutes = (router) => {
@@ -32,7 +32,7 @@ export const setRoutes = (router) => {
    */
 
   router.get('/authn/callback', (req, res, next) => {
-    console.log('Auth callback:', req.isAuthenticated)
+    console.log('Auth callback:', req.headers)
     passport.authenticate('oidc', {
       successRedirect: `https://${req.headers.host}?confirmed=true`,
       failureRedirect: '/noauth',
@@ -66,11 +66,7 @@ export const setRoutes = (router) => {
    */
   
   router.get('/health', (req, res, next) => {
-    return res.status(200).json({
-        message: {},
-        result: true,
-      });
-    }
+    
   );
 
   /**
