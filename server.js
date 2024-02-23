@@ -134,6 +134,8 @@ const keycloakClient = new keycloakIssuer.Client({
   response_types: ['code'],
 });
 
+console.log(keycloakClient.metadata)
+
 /**
  * Returns the <Client> class tied to the Keycloak issuer.
  */
@@ -142,12 +144,10 @@ let tokenset = {};
 
 passport.use(
   'oidc',
-  new Strategy({ client: keycloakClient, passReqToCallback: true}, (req, tokenSet, userinfo, done) => {
+  new Strategy({ client: keycloakClient, passReqToCallback: true}, (tokenSet, userinfo, done) => {
     console.log("tokenSet",tokenSet);
     console.log("userinfo",userinfo);
     tokenset = tokenSet
-    req.session.tokenSet = tokenSet;
-    req.session.userinfo = userinfo;
     return done(null, tokenSet.claims());
   }),
 );
