@@ -57,7 +57,7 @@ const keycloakClient = new keycloakIssuer.Client({
   response_types: ['code'],
 });
 
-// Initialize redis client for session store
+// Initialize Redis client for session store
 let redisClient = redis.createClient({
   url: process.env.SSO_REDIS_SESSION_STORE_URL,
   password: process.env.SSO_REDIS_CONNECT_PASSWORD
@@ -117,15 +117,15 @@ app.use(session({
 // parse cookies to store session data
 app.use(cookieParser(process.env.SSO_SESSION_SECRET));
 
-// init Passport
-app.use(passport.initialize());
-app.use(passport.session());
-
 /**
  * Configure passport
  * Returns the <Client> class tied to the Keycloak issuer.
  */
 
+app.use(passport.initialize());
+app.use(passport.session());
+
+// scope token claims for logout
 let tokenset = {};
 
 passport.use(
@@ -143,13 +143,13 @@ passport.deserializeUser((user, done) => {
 });
 
 /**
-* Authentication (Keycloak SSO-CSS)
+* Route: Authentication (Keycloak SSO-CSS)
 */
 
 app.get('/authn', passport.authenticate('oidc'));
 
 /**
-* Callback for authentication redirection
+* Route: Callback for authentication redirection
 */
 
 app.get('/authn/callback', (req, res, next) => {
@@ -160,7 +160,7 @@ app.get('/authn/callback', (req, res, next) => {
 });
 
 /**
-* Return response status of application
+* Route: Return response status of application
 */
 
 app.get('/health', (req, res) => {
@@ -168,7 +168,7 @@ app.get('/health', (req, res) => {
 });
 
 /**
-* Logout user from Keycloak session
+* Route: Logout SSO Keycloak session
 */
 
 app.get('/logout', (req, res, next) => {
@@ -182,7 +182,7 @@ app.get('/logout', (req, res, next) => {
 });
 
 /**
-   * Authorize user session
+   * Route: Authorize user session
    * - callback for NGINX auth_request: status 2xx = Good, 4xx = Bad.
    */
 
@@ -191,12 +191,10 @@ app.get('/', (req, res) => {
 });
 
 /**
-* Show connection listener status
+* Client listens on port 3000
 */
 
 app.listen(3000, function () {
   console.log('Listening on port 3000');
   console.log('Allowed origins:', allowedOrigins.join(', '));
 });
-
-export { passport, keycloakClient, tokenset };
