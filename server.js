@@ -26,6 +26,7 @@ import redis from 'redis';
 import RedisStore from "connect-redis";
 import cors from "cors";
 import logger from "morgan";
+import cookieParser from "cookie-parser";
 
 // optional load of .env
 dotenv.config();
@@ -94,6 +95,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.disable("x-powered-by");
+app.use(cookieParser());
 
 // 'trust proxy' = truthy to handle undefined forwarded proxy
 // ref: https://expressjs.com/en/guide/behind-proxies.html
