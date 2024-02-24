@@ -106,11 +106,11 @@ app.use(session({
     client: redisClient,
   }),
   secret: process.env.SSO_SESSION_SECRET,
-  resave: true,
+  resave: false,
   saveUninitialized: false,
   cookie: {
       sameSite: 'strict',
-      secure: true, 
+      secure: false, 
       httpOnly: true, 
       maxAge: 1000 * 60 * 10
   }
