@@ -132,18 +132,14 @@ let tokenset = {};
 passport.use(
   'oidc',
   new Strategy({ client: keycloakClient}, (tokenSet, userinfo, done) => {
-    console.log("tokenSet",tokenSet);
-    console.log("userinfo",userinfo);
     tokenset = tokenSet
     return done(null, tokenSet.claims());
   }),
 );
 passport.serializeUser((user, done) => {
-  console.log('Serialize:', user)
   done(null, user);
 });
 passport.deserializeUser((user, done) => {
-  console.log('Deserialize:', user)
   done(null, user);
 });
 
@@ -158,7 +154,6 @@ app.get('/authn', passport.authenticate('oidc'));
 */
 
 app.get('/authn/callback', (req, res, next) => {
-  console.log('Callback', req.session, req.headers.host)
   passport.authenticate('oidc', {
     successRedirect: `https://${req.headers.host}`,
     failureRedirect: '/',
@@ -189,13 +184,10 @@ app.get('/logout', (req, res, next) => {
 
 /**
    * Authorize user session
-   * 
+   * - callback for NGINX auth_request: status 2xx = Good, 4xx = Bad.
    */
 
 app.get('/', (req, res) => {
-  console.log(req.session)
-  // DEBUG
-  console.log('Authenticated?', req.isAuthenticated())
   return res.sendStatus(req.isAuthenticated() ? 200 : 401);
 });
 
