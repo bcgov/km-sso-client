@@ -110,10 +110,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-      sameSite: 'strict',
-      secure: false, 
-      httpOnly: true, 
-      maxAge: 1000 * 60 * 10
+      secure: false, // if true only transmit cookie over https
+      httpOnly: false, // if true prevent client side JS from reading the cookie 
+      maxAge: 1000 * 60 * 10 // session max age in miliseconds
   }
 }));
 // parse cookies to store session data
