@@ -170,9 +170,9 @@ app.get('/authn', passport.authenticate('oidc'));
 */
 
 app.get('/authn/callback', (req, res, next) => {
-  console.log(req.session)
+  console.log('Callback', req.session, req.headers.host)
   passport.authenticate('oidc', {
-    successRedirect: `https://${req.headers.host}?confirmed=true`,
+    successRedirect: `https://${req.headers.host}`,
     failureRedirect: '/',
   })(req, res, next);
 });
