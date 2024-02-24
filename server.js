@@ -95,7 +95,6 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.disable("x-powered-by");
-app.use(cookieParser());
 
 // 'trust proxy' = truthy to handle undefined forwarded proxy
 // ref: https://expressjs.com/en/guide/behind-proxies.html
@@ -117,6 +116,8 @@ app.use(session({
       maxAge: 1000 * 60 * 10
   }
 }));
+// parse cookies to store session data
+app.use(cookieParser(process.env.SSO_SESSION_SECRET));
 
 // init Passport
 app.use(passport.initialize());
@@ -148,18 +149,6 @@ passport.deserializeUser((user, done) => {
 });
 
 /**
-   * Authorize user session
-   * 
-   */
-
-app.get('/', (req, res) => {
-  console.log(req.session)
-  // DEBUG
-  console.log('Authenticated?', req.isAuthenticated())
-  return res.sendStatus(req.isAuthenticated() ? 200 : 401);
-});
-
-/**
 * Authentication (Keycloak SSO-CSS)
 */
 
@@ -182,7 +171,7 @@ app.get('/authn/callback', (req, res, next) => {
 */
 
 app.get('/health', (req, res) => {
-return res.sendStatus(200);
+  return res.sendStatus(200);
 });
 
 /**
@@ -197,6 +186,18 @@ app.get('/logout', (req, res, next) => {
     process.env.SSO_LOGOUT_REDIRECT_URI,
   )}&id_token_hint=${tokenset.id_token}`;
   res.redirect(`https://logon7.gov.bc.ca/clp-cgi/logoff.cgi?retnow=1&returl=${encodeURIComponent(retUrl)}`);
+});
+
+/**
+   * Authorize user session
+   * 
+   */
+
+app.get('/', (req, res) => {
+  console.log(req.session)
+  // DEBUG
+  console.log('Authenticated?', req.isAuthenticated())
+  return res.sendStatus(req.isAuthenticated() ? 200 : 401);
 });
 
 /**
