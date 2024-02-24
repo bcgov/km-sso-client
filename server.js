@@ -88,7 +88,7 @@ const corsConfig = {
 const app = express();
 
 // init utility middleware
-app.use(cors(corsConfig));
+// app.use(cors(corsConfig));
 app.use(logger('dev'));
 // app.use(helmet({contentSecurityPolicy: false}));
 app.use(express.json());
