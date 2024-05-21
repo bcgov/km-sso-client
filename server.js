@@ -146,7 +146,11 @@ passport.deserializeUser((user, done) => {
 * Route: Authentication (Keycloak SSO-CSS)
 */
 
-app.get('/authn', passport.authenticate('oidc'));
+app.get('/authn', (req, res) => {
+  const redirectURL = req.query.relay || '/';
+  req.session.redirectURL = redirectURL;
+  passport.authenticate('oidc')(req, res);
+});
 
 /**
 * Route: Callback for authentication redirection
@@ -154,7 +158,7 @@ app.get('/authn', passport.authenticate('oidc'));
 
 app.get('/authn/callback', (req, res, next) => {
   passport.authenticate('oidc', {
-    successRedirect: `https://${req.headers.host}`,
+    successRedirect: `https://${req.headers.host}${req.session.redirectURL}`,
     failureRedirect: '/',
   })(req, res, next);
 });
