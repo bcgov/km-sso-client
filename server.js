@@ -146,10 +146,10 @@ passport.deserializeUser((user, done) => {
 * Route: Authentication (Keycloak SSO-CSS)
 */
 
-app.get('/authn', (req, res) => {
+app.get('/authn', (req, res, next) => {
   const redirectURL = req.query.relay || '/';
   req.session.redirectURL = redirectURL;
-  passport.authenticate('oidc')(req, res);
+  passport.authenticate('oidc')(req, res, next);
 });
 
 /**
